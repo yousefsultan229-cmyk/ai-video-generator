@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Generator - صانع الفيديوهات بالذكاء الاصطناعي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #38bdf8;
+            font-size: 24px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .upload-section {
+            border: 2px dashed #475569;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+            background-color: #0f172a;
+        }
+
+        .upload-section:hover {
+            border-color: #38bdf8;
+        }
+
+        .upload-section input {
+            display: none;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #cbd5e1;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #38bdf8;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .result-section {
+            margin-top: 25px;
+            display: none;
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px solid #334155;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎬 صانع الفيديوهات بالذكاء الاصطناعي</h1>
+    <p class="subtitle">ارفع صورتك، اكتب حركة البرومبت، واحصل على فيديو سينمائي</p>
+
+    <!-- رفع الصورة -->
+    <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+        <p id="uploadText">📁 اضغط هنا لرفع الصورة</p>
+        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+        <img id="imagePreview" class="preview-img" alt="معاينة الصورة">
+    </div>
+
+    <!-- كتابة البرومبت -->
+    <div class="input-group">
+        <label for="prompt">الوصف (Prompt):</label>
+        <textarea id="prompt" placeholder="مثال: تحريك الشخصية لتلتفت نحو الكاميرا وتبتسم، مع حركة غيوم وموسيقى هادئة في الخلفية..."></textarea>
+    </div>
+
+    <!-- زر التوليد -->
+    <button onclick="generateVideo()">✨ إنتاج الفيديو الآن</button>
+
+    <!-- حالة التحميل -->
+    <div id="loading" class="loading">
+        ⏳ جاري معالجة الصورة وإنشاء الفيديو عبر الذكاء الاصطناعي...
+    </div>
+
+    <!-- عرض الفيديو الناتج -->
+    <div id="result" class="result-section">
+        <h3>🎉 تم إنشاء الفيديو بنجاح:</h3>
+        <video id="videoPlayer" controls autoplay loop>
+            <source src="" type="video/mp4">
+            متصفحك لا يدعم تشغيل الفيديو.
+        </video>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('imagePreview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('uploadText').innerText = "تم اختيار الصورة (اضغط للتغيير)";
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function generateVideo() {
+        const prompt = document.getElementById('prompt').value;
+        const fileInput = document.getElementById('fileInput');
+
+        if (!fileInput.files[0]) {
+            alert('يرجى رفع صورة أولاً!');
+            return;
+        }
+        if (!prompt.trim()) {
+            alert('يرجى كتابة البرومبت (وصف الحركة)!');
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').style.display = 'none';
+
+        // هنا يتم ربط الـ API الخارجي لتوليد الفيديو (Simulated API Call)
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            
+            // رابط فيديو تجريبي للعرض
+            document.getElementById('videoPlayer').src = "https://www.w3schools.com/html/mov_bbb.mp4";
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>
